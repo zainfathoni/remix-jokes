@@ -1,6 +1,7 @@
 import type { ActionFunction, LinksFunction } from 'remix'
 import { useActionData, Link, useSearchParams } from 'remix'
 import { db } from '~/utils/db.server'
+import { createUserSession, login } from '~/utils/session.server'
 import stylesUrl from '../styles/login.css'
 
 export let links: LinksFunction = () => {
@@ -37,7 +38,7 @@ export let action: ActionFunction = async ({ request }): Promise<Response | Acti
   let loginType = form.get('loginType')
   let username = form.get('username')
   let password = form.get('password')
-  let redirectTo = form.get('redirectTo')
+  let redirectTo = form.get('redirectTo') || '/jokes'
   if (
     typeof loginType !== 'string' ||
     typeof username !== 'string' ||
@@ -56,9 +57,14 @@ export let action: ActionFunction = async ({ request }): Promise<Response | Acti
 
   switch (loginType) {
     case 'login': {
-      // login to get the user
-      // if there's no user, return the fields and a formError
-      // if there is a user, create their session and redirect to /jokes
+      let user = await login({ username, password })
+      if (!user) {
+        return {
+          fields,
+          formError: `Invalid username or password.`,
+        }
+      }
+      return createUserSession(user.id, redirectTo)
       return { fields, formError: 'Not implemented' }
     }
     case 'register': {
