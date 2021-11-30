@@ -1,7 +1,7 @@
 import type { ActionFunction, LinksFunction } from 'remix'
 import { useActionData, Link, useSearchParams } from 'remix'
 import { db } from '~/utils/db.server'
-import { createUserSession, login } from '~/utils/session.server'
+import { createUserSession, login, register } from '~/utils/session.server'
 import stylesUrl from '../styles/login.css'
 
 export let links: LinksFunction = () => {
@@ -77,9 +77,14 @@ export let action: ActionFunction = async ({ request }): Promise<Response | Acti
           formError: `User with username ${username} already exists`,
         }
       }
-      // create the user
-      // create their session and redirect to /jokes
-      return { fields, formError: 'Not implemented' }
+      let user = await register({ username, password })
+      if (!user) {
+        return {
+          fields,
+          formError: `Failed to register user.`,
+        }
+      }
+      return createUserSession(user.id, redirectTo)
     }
     default: {
       return { fields, formError: `Login type invalid` }
