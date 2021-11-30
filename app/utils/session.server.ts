@@ -51,6 +51,20 @@ export async function getUserId(request: Request) {
   return userId;
 }
 
+export async function requireUserId(
+  request: Request,
+  redirectTo: string = new URL(request.url).pathname
+) {
+  let userId = await getUserId(request);
+  if (!userId) {
+    let searchParams = new URLSearchParams([
+      ["redirectTo", redirectTo]
+    ]);
+    throw redirect(`/login?${searchParams}`);
+  }
+  return userId;
+}
+
 export async function createUserSession(userId: string, redirectTo: string) {
   let session = await storage.getSession();
   session.set("userId", userId);

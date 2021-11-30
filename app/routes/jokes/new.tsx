@@ -1,7 +1,7 @@
 import { ActionFunction, useActionData } from 'remix'
 import { redirect } from 'remix'
 import { db } from '~/utils/db.server'
-import { getUserId } from '~/utils/session.server'
+import { requireUserId } from '~/utils/session.server'
 
 function validateJokeName(name: string) {
   if (name.length < 3) {
@@ -28,10 +28,7 @@ type ActionData = {
 }
 
 export let action: ActionFunction = async ({ request }) => {
-  let userId = await getUserId(request)
-  if (!userId) {
-    return redirect('/login?redirectTo=/jokes/new')
-  }
+  let userId = await requireUserId(request)
   let form = await request.formData()
   let name = form.get('name')
   let content = form.get('content')
