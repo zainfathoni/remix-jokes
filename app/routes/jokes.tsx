@@ -83,3 +83,6 @@ export default function JokesRoute() {
     </div>
   )
 }
+
+// FIXME: https://github.com/remix-run/remix/issues/599#issuecomment-978364515
+export function CatchBoundary() {}
